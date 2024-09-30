@@ -1,0 +1,38 @@
+import os
+import subprocess
+import logging
+from datetime import datetime
+
+# Set up logging
+logging.basicConfig(filename='backup.log', level=logging.INFO,
+                    format='%(asctime)s:%(levelname)s:%(message)s')
+
+# Configuration
+SOURCE_DIR = '/path/to/source/directory'  # Change this to your source directory
+REMOTE_USER = 'your_username'              # Change this to your remote username
+REMOTE_HOST = 'your_remote_host'           # Change this to your remote host
+REMOTE_DIR = '/path/to/remote/backup'      # Change this to your remote backup directory
+TIMESTAMP = datetime.now().strftime('%Y%m%d_%H%M%S')
+DESTINATION = os.path.join(REMOTE_DIR, f"backup_{TIMESTAMP}")
+
+def backup_directory():
+    try:
+        # Ensure the source directory exists
+        if not os.path.exists(SOURCE_DIR):
+            raise FileNotFoundError(f"Source directory '{SOURCE_DIR}' does not exist.")
+
+        # Create the destination path on the remote server
+        command = f'scp -r {SOURCE_DIR} {REMOTE_USER}@{REMOTE_HOST}:{DESTINATION}'
+        subprocess.run(command, shell=True, check=True)
+        
+        logging.info('Backup completed successfully.')
+        print('Backup completed successfully.')
+    except subprocess.CalledProcessError as e:
+        logging.error(f'Backup failed: {e}')
+        print(f'Backup failed: {e}')
+    except Exception as e:
+        logging.error(f'Error occurred: {e}')
+        print(f'Error occurred: {e}')
+
+if __name__ == "__main__":
+    backup_directory()
